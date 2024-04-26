@@ -13,7 +13,8 @@
 use std::{env, path::PathBuf};
 
 #[cfg(all(feature = "bevy", not(feature = "subcrates")))]
-use bevy::{
+#[doc(hidden)]
+pub use bevy::{
     app::App,
     log::{
         tracing_subscriber::{
@@ -26,9 +27,11 @@ use bevy::{
 };
 
 #[cfg(feature = "subcrates")]
-use bevy_app::App;
+#[doc(hidden)]
+pub use bevy_app::App;
 #[cfg(feature = "subcrates")]
-use bevy_log::{
+#[doc(hidden)]
+pub use bevy_log::{
     tracing_subscriber::{
         layer::{self, SubscriberExt},
         Layer,
@@ -36,14 +39,28 @@ use bevy_log::{
     BoxedSubscriber, Level,
 };
 #[cfg(feature = "subcrates")]
-use bevy_utils::tracing::{Event, Subscriber};
+#[doc(hidden)]
+pub use bevy_utils::tracing::{Event, Subscriber};
 
 use sentry::ClientInitGuard;
 
-struct SentryLayer {
+/// A layer that reports events to Sentry
+#[doc(hidden)]
+pub struct SentryLayer {
     #[allow(dead_code)]
     guard: ClientInitGuard,
     report_only_panic: bool,
+}
+
+impl SentryLayer {
+    /// Create the layer
+    #[doc(hidden)]
+    pub fn new(guard: ClientInitGuard, report_only_panic: bool) -> Self {
+        Self {
+            guard,
+            report_only_panic,
+        }
+    }
 }
 
 impl<S: Subscriber> Layer<S> for SentryLayer {
@@ -78,19 +95,20 @@ impl<S: Subscriber> Layer<S> for SentryLayer {
 /// ```
 pub fn sentry_panic_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedSubscriber {
     if let Ok(sentry_dsn) = env::var("SENTRY_DSN") {
-        let guard = sentry::init((
+        let guard = init((
             sentry_dsn,
-            sentry::ClientOptions {
+            ClientOptions {
                 release: sentry::release_name!(),
                 ..Default::default()
             },
         ));
+
         env::args().next().and_then(|file| {
             PathBuf::from(file)
                 .file_name()
                 .and_then(|file| file.to_str())
                 .map(|exe| {
-                    sentry::configure_scope(|scope| {
+                    configure_scope(|scope| {
                         scope.set_tag("executable", dbg!(exe));
                     });
                 })
@@ -121,13 +139,24 @@ pub fn sentry_panic_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedS
 /// ```
 pub fn sentry_error_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedSubscriber {
     if let Ok(sentry_dsn) = env::var("SENTRY_DSN") {
-        let guard = sentry::init((
+        let guard = init((
             sentry_dsn,
-            sentry::ClientOptions {
+            ClientOptions {
                 release: sentry::release_name!(),
                 ..Default::default()
             },
         ));
+
+        env::args().next().and_then(|file| {
+            PathBuf::from(file)
+                .file_name()
+                .and_then(|file| file.to_str())
+                .map(|exe| {
+                    configure_scope(|scope| {
+                        scope.set_tag("executable", dbg!(exe));
+                    });
+                })
+        });
 
         Box::new(subscriber.with(SentryLayer {
             guard,
@@ -136,4 +165,65 @@ pub fn sentry_error_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedS
     } else {
         subscriber
     }
+}
+
+#[doc(hidden)]
+pub use sentry::{configure_scope, init, ClientOptions};
+
+/// Reports panics and errors to Sentry
+/// logs will be added as breadcrumbs
+///
+/// Unlike the functions, this macro will capture the crate name and version, so it should be used from the main binary crate
+///
+/// ```rust
+/// # use bevy::prelude::*;
+/// # use bevy::log::LogPlugin;
+/// use vleue_sentry::sentry_reporter;
+///
+/// App::new()
+///     .add_plugins(DefaultPlugins.set(LogPlugin {
+///         update_subscriber: Some(sentry_reporter!(true)),
+///         ..default()
+///     }));
+/// ```
+#[macro_export]
+macro_rules! sentry_reporter {
+    ($report_only_panic:literal) => {
+        |_app: &mut vleue_sentry::App, subscriber: vleue_sentry::BoxedSubscriber| {
+            if let Ok(sentry_dsn) = std::env::var("SENTRY_DSN") {
+                let guard = vleue_sentry::init((
+                    sentry_dsn,
+                    vleue_sentry::ClientOptions {
+                        release: Some(
+                            format!(
+                                "{}@{}",
+                                std::env!("CARGO_CRATE_NAME"),
+                                std::env!("CARGO_PKG_VERSION")
+                            )
+                            .into(),
+                        ),
+                        ..Default::default()
+                    },
+                ));
+
+                std::env::args().next().and_then(|file| {
+                    std::path::PathBuf::from(file)
+                        .file_name()
+                        .and_then(|file| file.to_str())
+                        .map(|exe| {
+                            vleue_sentry::configure_scope(|scope| {
+                                scope.set_tag("executable", exe);
+                            });
+                        })
+                });
+
+                Box::new(vleue_sentry::SubscriberExt::with(
+                    subscriber,
+                    vleue_sentry::SentryLayer::new(guard, $report_only_panic),
+                ))
+            } else {
+                subscriber
+            }
+        }
+    };
 }
