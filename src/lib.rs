@@ -12,9 +12,17 @@
 
 use std::env;
 
-use bevy::log::BoxedSubscriber;
-use tracing::{Level, Subscriber};
-use tracing_subscriber::{layer::SubscriberExt, Layer};
+use bevy::{
+    app::App,
+    log::{
+        tracing_subscriber::{
+            layer::{self, SubscriberExt},
+            Layer,
+        },
+        BoxedSubscriber,
+    },
+    utils::tracing::{Event, Level, Subscriber},
+};
 
 use sentry::ClientInitGuard;
 
@@ -25,11 +33,7 @@ struct SentryLayer {
 }
 
 impl<S: Subscriber> Layer<S> for SentryLayer {
-    fn on_event(
-        &self,
-        event: &tracing::Event<'_>,
-        _ctx: tracing_subscriber::layer::Context<'_, S>,
-    ) {
+    fn on_event(&self, event: &Event<'_>, _ctx: layer::Context<'_, S>) {
         let breadcrumb = sentry_tracing::breadcrumb_from_event(event);
         if event.metadata().level() == &Level::ERROR && !self.report_only_panic {
             sentry::capture_event(sentry::protocol::Event {
@@ -58,7 +62,7 @@ impl<S: Subscriber> Layer<S> for SentryLayer {
 ///         ..default()
 ///     }));
 /// ```
-pub fn sentry_panic_reporter(subscriber: BoxedSubscriber) -> BoxedSubscriber {
+pub fn sentry_panic_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedSubscriber {
     if let Ok(sentry_dsn) = env::var("SENTRY_DSN") {
         let guard = sentry::init((
             sentry_dsn,
@@ -91,7 +95,7 @@ pub fn sentry_panic_reporter(subscriber: BoxedSubscriber) -> BoxedSubscriber {
 ///         ..default()
 ///     }));
 /// ```
-pub fn sentry_error_reporter(subscriber: BoxedSubscriber) -> BoxedSubscriber {
+pub fn sentry_error_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedSubscriber {
     if let Ok(sentry_dsn) = env::var("SENTRY_DSN") {
         let guard = sentry::init((
             sentry_dsn,

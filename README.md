@@ -1,4 +1,4 @@
-# Bevy Easings
+# Vleue Sentry Reporter
 
 ![MIT/Apache 2.0](https://img.shields.io/badge/license-MIT%2FApache-blue.svg)
 [![Doc](https://docs.rs/vleue_sentry/badge.svg)](https://docs.rs/vleue_sentry)
