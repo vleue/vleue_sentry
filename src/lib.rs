@@ -105,7 +105,7 @@ pub fn sentry_panic_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedS
 
         env::args().next().and_then(|file| {
             PathBuf::from(file)
-                .file_name()
+                .file_stem()
                 .and_then(|file| file.to_str())
                 .map(|exe| {
                     configure_scope(|scope| {
