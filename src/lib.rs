@@ -10,7 +10,7 @@
 )]
 #![doc = include_str!("../README.md")]
 
-use std::env;
+use std::{env, path::PathBuf};
 
 #[cfg(all(feature = "bevy", not(feature = "subcrates")))]
 use bevy::{
@@ -85,6 +85,16 @@ pub fn sentry_panic_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedS
                 ..Default::default()
             },
         ));
+        env::args().next().and_then(|file| {
+            PathBuf::from(file)
+                .file_name()
+                .and_then(|file| file.to_str())
+                .map(|exe| {
+                    sentry::configure_scope(|scope| {
+                        scope.set_tag("executable", dbg!(exe));
+                    });
+                })
+        });
 
         Box::new(subscriber.with(SentryLayer {
             guard,
