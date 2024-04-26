@@ -1,0 +1,20 @@
+[package]
+name = "vleue_sentry"
+version = "0.1.0"
+edition = "2021"
+authors = ["François Mockers <francois.mockers@vleue.com>"]
+description = "Sentry reporting plugin for Bevy"
+repository = "https://github.com/vleue/vleue_sentry"
+homepage = "https://github.com/vleue/vleue_sentry"
+documentation = "https://docs.rs/vleue_sentry"
+keywords = ["bevy", "error", "reporting", "observability", "sentry", "tracing"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+categories = ["game-development"]
+
+[dependencies]
+sentry = "0.32.3"
+sentry-tracing = "0.32.3"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+bevy = { version = "0.13", default-features = false }
