@@ -12,6 +12,7 @@
 
 use std::env;
 
+#[cfg(all(feature = "bevy", not(feature = "subcrates")))]
 use bevy::{
     app::App,
     log::{
@@ -23,6 +24,19 @@ use bevy::{
     },
     utils::tracing::{Event, Level, Subscriber},
 };
+
+#[cfg(feature = "subcrates")]
+use bevy_app::App;
+#[cfg(feature = "subcrates")]
+use bevy_log::{
+    tracing_subscriber::{
+        layer::{self, SubscriberExt},
+        Layer,
+    },
+    BoxedSubscriber, Level,
+};
+#[cfg(feature = "subcrates")]
+use bevy_utils::tracing::{Event, Subscriber};
 
 use sentry::ClientInitGuard;
 
