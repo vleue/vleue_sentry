@@ -149,7 +149,7 @@ pub fn sentry_error_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedS
 
         env::args().next().and_then(|file| {
             PathBuf::from(file)
-                .file_name()
+                .file_stem()
                 .and_then(|file| file.to_str())
                 .map(|exe| {
                     configure_scope(|scope| {
@@ -208,7 +208,7 @@ macro_rules! sentry_reporter {
 
                 std::env::args().next().and_then(|file| {
                     std::path::PathBuf::from(file)
-                        .file_name()
+                        .file_stem()
                         .and_then(|file| file.to_str())
                         .map(|exe| {
                             vleue_sentry::configure_scope(|scope| {
