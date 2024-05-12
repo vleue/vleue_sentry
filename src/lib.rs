@@ -21,7 +21,7 @@ pub use bevy::{
             layer::{self, SubscriberExt},
             Layer,
         },
-        BoxedSubscriber,
+        BoxedLayer,
     },
     utils::tracing::{Event, Level, Subscriber},
 };
@@ -36,7 +36,7 @@ pub use bevy_log::{
         layer::{self, SubscriberExt},
         Layer,
     },
-    BoxedSubscriber, Level,
+    BoxedLayer, Level,
 };
 #[cfg(feature = "subcrates")]
 #[doc(hidden)]
@@ -89,11 +89,11 @@ impl<S: Subscriber> Layer<S> for SentryLayer {
 ///
 /// App::new()
 ///     .add_plugins(DefaultPlugins.set(LogPlugin {
-///         update_subscriber: Some(sentry_panic_reporter),
+///         custom_layer: sentry_panic_reporter,
 ///         ..default()
 ///     }));
 /// ```
-pub fn sentry_panic_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedSubscriber {
+pub fn sentry_panic_reporter(_: &mut App) -> Option<BoxedLayer> {
     if let Ok(sentry_dsn) = env::var("SENTRY_DSN") {
         let guard = init((
             sentry_dsn,
@@ -114,12 +114,12 @@ pub fn sentry_panic_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedS
                 })
         });
 
-        Box::new(subscriber.with(SentryLayer {
+        Some(Box::new(SentryLayer {
             guard,
             report_only_panic: true,
         }))
     } else {
-        subscriber
+        None
     }
 }
 
@@ -133,11 +133,11 @@ pub fn sentry_panic_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedS
 ///
 /// App::new()
 ///     .add_plugins(DefaultPlugins.set(LogPlugin {
-///         update_subscriber: Some(sentry_error_reporter),
+///         custom_layer: sentry_error_reporter,
 ///         ..default()
 ///     }));
 /// ```
-pub fn sentry_error_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedSubscriber {
+pub fn sentry_error_reporter(_: &mut App) -> Option<BoxedLayer> {
     if let Ok(sentry_dsn) = env::var("SENTRY_DSN") {
         let guard = init((
             sentry_dsn,
@@ -158,12 +158,12 @@ pub fn sentry_error_reporter(_: &mut App, subscriber: BoxedSubscriber) -> BoxedS
                 })
         });
 
-        Box::new(subscriber.with(SentryLayer {
+        Some(Box::new(SentryLayer {
             guard,
             report_only_panic: false,
         }))
     } else {
-        subscriber
+        None
     }
 }
 
@@ -182,14 +182,14 @@ pub use sentry::{configure_scope, init, ClientOptions};
 ///
 /// App::new()
 ///     .add_plugins(DefaultPlugins.set(LogPlugin {
-///         update_subscriber: Some(sentry_reporter!(true)),
+///         custom_layer: sentry_reporter!(true),
 ///         ..default()
 ///     }));
 /// ```
 #[macro_export]
 macro_rules! sentry_reporter {
     ($report_only_panic:literal) => {
-        |_app: &mut vleue_sentry::App, subscriber: vleue_sentry::BoxedSubscriber| {
+        |_app: &mut vleue_sentry::App| {
             if let Ok(sentry_dsn) = std::env::var("SENTRY_DSN") {
                 let guard = vleue_sentry::init((
                     sentry_dsn,
@@ -217,12 +217,12 @@ macro_rules! sentry_reporter {
                         })
                 });
 
-                Box::new(vleue_sentry::SubscriberExt::with(
-                    subscriber,
-                    vleue_sentry::SentryLayer::new(guard, $report_only_panic),
-                ))
+                Some(Box::new(vleue_sentry::SentryLayer::new(
+                    guard,
+                    $report_only_panic,
+                )))
             } else {
-                subscriber
+                None
             }
         }
     };

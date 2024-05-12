@@ -20,7 +20,7 @@ use vleue_sentry::sentry_panic_reporter;
 fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(LogPlugin {
-            update_subscriber: Some(sentry_panic_reporter),
+            custom_layer: sentry_panic_reporter,
             ..default()
         }));
 }
