@@ -22,9 +22,9 @@ jobs:
     name: Test Suite
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/bin/
@@ -52,9 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Cache
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cargo/bin/
@@ -63,56 +63,30 @@ jobs:
             ~/.cargo/git/db/
             target/
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.toml') }}
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          components: clippy
-          override: true
+      - uses: dtolnay/rust-toolchain@stable
       - name: Install Dependencies
         run: sudo apt-get update; sudo apt-get install pkg-config libx11-dev libasound2-dev libudev-dev
       - name: Run clippy
-        uses: actions-rs/clippy-check@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          args: -- -D warnings
+        run: cargo clippy -- -D warnings
 
   format:
     name: Format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          profile: minimal
-          components: rustfmt
-          override: true
+        uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
       - name: Run cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+        run: cargo fmt --all -- --check
 
   doc:
     name: Doc
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
-      - name: Install stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: nightly
-          profile: minimal
-          override: true
-      - name: Run cargo fmt
-        uses: actions-rs/cargo@v1
-        with:
-          command: doc
-          args: --no-deps
+        uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build docs
+        run: cargo docs
         env:
           RUSTDOCFLAGS: -D warnings
