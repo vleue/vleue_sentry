@@ -25,3 +25,10 @@ fn main() {
         }));
 }
 ```
+
+
+## Bevy Compatibility
+
+|Bevy|vleue_sentry|
+|---|---|
+|0.15|0.1|

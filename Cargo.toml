@@ -1,6 +1,6 @@
 [package]
 name = "vleue_sentry"
-version = "0.1.0"
+version = "0.1.0-rc.1"
 edition = "2021"
 authors = ["François Mockers <francois.mockers@vleue.com>"]
 description = "Sentry reporting plugin for Bevy"
@@ -19,7 +19,7 @@ subcrates = ["bevy_app", "bevy_log", "bevy_utils"]
 [dependencies]
 sentry = "0.32.3"
 sentry-tracing = "0.32.3"
-bevy = { version = "0.15.0-dev", git = "https://github.com/bevyengine/bevy", default-features = false, optional = true }
-bevy_app = { version = "0.15.0-dev", git = "https://github.com/bevyengine/bevy", default-features = false, optional = true }
-bevy_log = { version = "0.15.0-dev", git = "https://github.com/bevyengine/bevy", default-features = false, optional = true }
-bevy_utils = { version = "0.15.0-dev", git = "https://github.com/bevyengine/bevy", default-features = false, optional = true }
+bevy = { version = "0.15.0-rc.3", default-features = false, optional = true }
+bevy_app = { version = "0.15.0-rc.3", default-features = false, optional = true }
+bevy_log = { version = "0.15.0-rc.3", default-features = false, optional = true }
+bevy_utils = { version = "0.15.0-rc.3", default-features = false, optional = true }
