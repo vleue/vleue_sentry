@@ -19,7 +19,7 @@ subcrates = ["bevy_app", "bevy_log", "bevy_utils"]
 [dependencies]
 sentry = "0.32.3"
 sentry-tracing = "0.32.3"
-bevy = { version = "0.15.0-rc.3", default-features = false, optional = true }
-bevy_app = { version = "0.15.0-rc.3", default-features = false, optional = true }
-bevy_log = { version = "0.15.0-rc.3", default-features = false, optional = true }
-bevy_utils = { version = "0.15.0-rc.3", default-features = false, optional = true }
+bevy = { version = "0.15.0", default-features = false, optional = true }
+bevy_app = { version = "0.15.0", default-features = false, optional = true }
+bevy_log = { version = "0.15.0", default-features = false, optional = true }
+bevy_utils = { version = "0.15.0", default-features = false, optional = true }
