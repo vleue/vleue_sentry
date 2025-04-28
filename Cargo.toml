@@ -1,6 +1,6 @@
 [package]
 name = "vleue_sentry"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 authors = ["François Mockers <francois.mockers@vleue.com>"]
 description = "Sentry reporting plugin for Bevy"
