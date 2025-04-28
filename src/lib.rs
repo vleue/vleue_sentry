@@ -22,6 +22,7 @@ pub use bevy::{
         tracing_subscriber::{
             Layer,
             layer::{self, SubscriberExt},
+            registry::LookupSpan,
         },
     },
 };
@@ -66,9 +67,9 @@ impl SentryLayer {
     }
 }
 
-impl<S: Subscriber> Layer<S> for SentryLayer {
-    fn on_event(&self, event: &Event<'_>, _ctx: layer::Context<'_, S>) {
-        let breadcrumb = sentry_tracing::breadcrumb_from_event(event);
+impl<S: Subscriber + for<'a> LookupSpan<'a>> Layer<S> for SentryLayer {
+    fn on_event(&self, event: &Event<'_>, ctx: layer::Context<'_, S>) {
+        let breadcrumb = sentry_tracing::breadcrumb_from_event(event, ctx);
         if event.metadata().level() == &Level::ERROR && !self.report_only_panic {
             sentry::capture_event(sentry::protocol::Event {
                 level: breadcrumb.level,
