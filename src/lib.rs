@@ -18,14 +18,16 @@ use std::{env, path::PathBuf};
 pub use bevy::{
     app::App,
     log::{
-        tracing_subscriber::{
-            layer::{self, SubscriberExt},
-            Layer,
-        },
         BoxedLayer,
+        tracing_subscriber::{
+            Layer,
+            layer::{self, SubscriberExt},
+        },
     },
-    utils::tracing::{Event, Level, Subscriber},
 };
+#[cfg(all(feature = "bevy", not(feature = "subcrates")))]
+#[doc(hidden)]
+use tracing::{Event, Level, Subscriber};
 
 #[cfg(feature = "subcrates")]
 #[doc(hidden)]
@@ -33,11 +35,11 @@ pub use bevy_app::App;
 #[cfg(feature = "subcrates")]
 #[doc(hidden)]
 pub use bevy_log::{
-    tracing_subscriber::{
-        layer::{self, SubscriberExt},
-        Layer,
-    },
     BoxedLayer, Level,
+    tracing_subscriber::{
+        Layer,
+        layer::{self, SubscriberExt},
+    },
 };
 #[cfg(feature = "subcrates")]
 #[doc(hidden)]
@@ -169,7 +171,7 @@ pub fn sentry_error_reporter(_: &mut App) -> Option<BoxedLayer> {
 }
 
 #[doc(hidden)]
-pub use sentry::{configure_scope, init, ClientOptions};
+pub use sentry::{ClientOptions, configure_scope, init};
 
 /// Reports panics and errors to Sentry
 /// logs will be added as breadcrumbs
