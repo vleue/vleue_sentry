@@ -18,7 +18,7 @@ subcrates = ["bevy_app", "bevy_log", "bevy_utils"]
 
 [dependencies]
 sentry = "0.37"
-sentry-tracing = "0.37"
+sentry-tracing = "0.38"
 tracing = "0.1"
 bevy = { version = "0.16.0", default-features = false, optional = true, features = [
     "bevy_log",
