@@ -25,4 +25,4 @@ bevy = { version = "0.16.0", default-features = false, optional = true, features
 ] }
 bevy_app = { version = "0.16.0", default-features = false, optional = true }
 bevy_log = { version = "0.16.0", default-features = false, optional = true }
-bevy_utils = { version = "0.16.0", default-features = false, optional = true }
+bevy_utils = { version = "0.17.0", default-features = false, optional = true }
